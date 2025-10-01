@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora Simples</title>
+  <style>
+    :root {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.4s ease, color 0.4s ease;
+    }
+
+    body.theme-dark {
+      --bg: linear-gradient(135deg, #1f1c2c, #928dab);
+      --panel-bg: rgba(255, 255, 255, 0.12);
+      --panel-border: rgba(255, 255, 255, 0.35);
+      --button-bg: rgba(255, 255, 255, 0.18);
+      --button-hover: rgba(255, 255, 255, 0.28);
+      --button-operator: rgba(255, 255, 255, 0.22);
+      --button-operator-hover: rgba(255, 255, 255, 0.32);
+      --accent: #ffca3a;
+      --text: #f3f3f3;
+      --display-bg: rgba(0, 0, 0, 0.35);
+      color-scheme: dark;
+    }
+
+    body.theme-light {
+      --bg: linear-gradient(135deg, #f8fafc, #dce3f7);
+      --panel-bg: rgba(255, 255, 255, 0.65);
+      --panel-border: rgba(163, 178, 201, 0.65);
+      --button-bg: rgba(225, 232, 245, 0.8);
+      --button-hover: rgba(210, 220, 238, 0.95);
+      --button-operator: rgba(201, 211, 233, 0.85);
+      --button-operator-hover: rgba(183, 198, 228, 0.95);
+      --accent: #ff9f1c;
+      --text: #1d1f2f;
+      --display-bg: rgba(255, 255, 255, 0.85);
+      color-scheme: light;
+    }
+
+    .calculator {
+      width: min(360px, 90vw);
+      padding: 1.5rem;
+      border-radius: 1.5rem;
+      backdrop-filter: blur(20px);
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      box-shadow: 0 1.5rem 3rem rgba(0, 0, 0, 0.35);
+      display: grid;
+      gap: 1rem;
+      position: relative;
+    }
+
+    .display {
+      background: var(--display-bg);
+      border: none;
+      border-radius: 0.75rem;
+      padding: 1rem;
+      font-size: 2.5rem;
+      text-align: right;
+      color: var(--text);
+      letter-spacing: 0.05em;
+    }
+
+    .display:focus {
+      outline: none;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+
+    button {
+      border: none;
+      border-radius: 0.75rem;
+      padding: 0.85rem;
+      font-size: 1.15rem;
+      background: var(--button-bg);
+      color: var(--text);
+      cursor: pointer;
+      transition: transform 0.1s ease, background 0.15s ease;
+    }
+
+    button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    button:hover {
+      background: var(--button-hover);
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    .span-two {
+      grid-column: span 2;
+    }
+
+    .span-two.align-left {
+      justify-self: stretch;
+      text-align: left;
+      padding-left: 1.5rem;
+    }
+
+    .tall {
+      grid-row: span 2;
+      align-self: stretch;
+    }
+
+    .operator {
+      background: var(--button-operator);
+    }
+
+    .operator:hover {
+      background: var(--button-operator-hover);
+    }
+
+    .accent {
+      background: var(--accent);
+      color: #2e2a2a;
+      font-weight: 600;
+    }
+
+    .accent:hover {
+      background: #ffd760;
+    }
+
+    body.theme-light .accent:hover {
+      background: #ffb347;
+    }
+
+    .theme-toggle {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      border: none;
+      border-radius: 999px;
+      padding: 0.4rem 0.75rem;
+      font-size: 0.9rem;
+      background: var(--button-operator);
+      color: var(--text);
+      cursor: pointer;
+      transition: transform 0.1s ease, background 0.15s ease;
+    }
+
+    .theme-toggle:hover {
+      background: var(--button-operator-hover);
+    }
+  </style>
+</head>
+<body class="theme-dark">
+  <div class="calculator" role="application" aria-label="Calculadora">
+    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Alternar para tema claro">
+      ☀️
+    </button>
+    <input id="display" class="display" type="text" value="0" aria-live="polite" readonly />
+    <div class="buttons">
+      <button type="button" data-action="clear" class="operator">C</button>
+      <button type="button" data-action="backspace" class="operator">⌫</button>
+      <button type="button" data-value="/" class="operator">÷</button>
+      <button type="button" data-value="*" class="operator">×</button>
+
+      <button type="button" data-value="7">7</button>
+      <button type="button" data-value="8">8</button>
+      <button type="button" data-value="9">9</button>
+      <button type="button" data-value="-" class="operator">−</button>
+
+      <button type="button" data-value="4">4</button>
+      <button type="button" data-value="5">5</button>
+      <button type="button" data-value="6">6</button>
+      <button type="button" data-value="+" class="operator">+</button>
+
+      <button type="button" data-value="1">1</button>
+      <button type="button" data-value="2">2</button>
+      <button type="button" data-value="3">3</button>
+      <button type="button" data-action="equals" class="accent tall">=</button>
+
+      <button type="button" data-value="0" class="span-two align-left">0</button>
+      <button type="button" data-value=".">,</button>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const display = document.getElementById('display');
+      const buttons = document.querySelectorAll('.buttons button');
+      const body = document.body;
+      const themeToggle = document.getElementById('theme-toggle');
+      let expression = '';
+      let showingError = false;
+
+      const THEMES = {
+        dark: 'theme-dark',
+        light: 'theme-light',
+      };
+
+      const applyTheme = (theme) => {
+        const normalized = theme === THEMES.light ? THEMES.light : THEMES.dark;
+        body.classList.remove(THEMES.dark, THEMES.light);
+        body.classList.add(normalized);
+        const isDark = normalized === THEMES.dark;
+        themeToggle.textContent = isDark ? '☀️' : '🌙';
+        themeToggle.setAttribute(
+          'aria-label',
+          isDark ? 'Alternar para tema claro' : 'Alternar para tema escuro'
+        );
+        try {
+          localStorage.setItem('calculator-theme', normalized);
+        } catch (error) {
+          // Ignora falhas de acesso ao localStorage (modo privado, etc.).
+        }
+      };
+
+      const storedTheme = (() => {
+        try {
+          return localStorage.getItem('calculator-theme');
+        } catch (error) {
+          return null;
+        }
+      })();
+
+      applyTheme(storedTheme);
+
+      themeToggle.addEventListener('click', () => {
+        const nextTheme = body.classList.contains(THEMES.dark) ? THEMES.light : THEMES.dark;
+        applyTheme(nextTheme);
+      });
+
+      const updateDisplay = () => {
+        if (showingError) {
+          display.value = 'Erro';
+          return;
+        }
+        display.value = expression || '0';
+      };
+
+      const appendValue = (value) => {
+        if (showingError) {
+          showingError = false;
+          expression = '';
+        }
+        const lastChar = expression.slice(-1);
+        const operators = ['+', '-', '*', '/'];
+        if (operators.includes(value)) {
+          if (!expression || operators.includes(lastChar)) {
+            return;
+          }
+        }
+        if (value === '.') {
+          const parts = expression.split(/[-+*/]/);
+          const currentNumber = parts[parts.length - 1];
+          if (currentNumber.includes('.')) {
+            return;
+          }
+        }
+        expression += value;
+        updateDisplay();
+      };
+
+      const clearAll = () => {
+        expression = '';
+        showingError = false;
+        updateDisplay();
+      };
+
+      const backspace = () => {
+        if (showingError) {
+          clearAll();
+          return;
+        }
+        expression = expression.slice(0, -1);
+        updateDisplay();
+      };
+
+      const evaluateExpression = () => {
+        if (!expression) {
+          return;
+        }
+        try {
+          const result = Function(`"use strict"; return (${expression})`)();
+          expression = Number.isFinite(result) ? String(result) : '';
+          showingError = !expression;
+        } catch (error) {
+          expression = '';
+          showingError = true;
+        }
+        updateDisplay();
+      };
+
+      buttons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const { action, value } = button.dataset;
+          if (action === 'clear') {
+            clearAll();
+          } else if (action === 'backspace') {
+            backspace();
+          } else if (action === 'equals') {
+            evaluateExpression();
+          } else if (value) {
+            appendValue(value);
+          }
+        });
+      });
+
+      document.addEventListener('keydown', (event) => {
+        const { key } = event;
+        if (/^[0-9]$/.test(key)) {
+          appendValue(key);
+          return;
+        }
+        if (['+', '-', '*', '/'].includes(key)) {
+          appendValue(key);
+          event.preventDefault();
+          return;
+        }
+        if (key === 'Enter' || key === '=') {
+          evaluateExpression();
+          event.preventDefault();
+          return;
+        }
+        if (key === 'Backspace') {
+          backspace();
+          event.preventDefault();
+          return;
+        }
+        if (key === 'Delete') {
+          clearAll();
+          event.preventDefault();
+          return;
+        }
+        if (key === ',' || key === '.') {
+          appendValue('.');
+          event.preventDefault();
+        }
+      });
+
+      updateDisplay();
+    })();
+  </script>
+</body>
+</html>
